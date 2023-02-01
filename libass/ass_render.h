@@ -275,6 +275,10 @@ typedef struct {
     int apply_font_scale;
     // whether this is assumed to be explicitly positioned
     int explicit;
+
+    int margin_l;
+    int margin_r;
+    int margin_v;
 } RenderContext;
 
 typedef struct {

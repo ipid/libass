@@ -1067,6 +1067,8 @@ init_render_context(ASS_Renderer *render_priv, ASS_Event *event)
     reset_render_context(render_priv, NULL);
     render_priv->state.alignment = render_priv->state.style->Alignment;
     render_priv->state.justify = render_priv->state.style->Justify;
+
+    render_priv->state.margin_l = render_priv->state.margin_r = render_priv->state.margin_v = 0;
 }
 
 static void free_render_context(ASS_Renderer *render_priv)
@@ -2665,12 +2667,29 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
 
     int valign = render_priv->state.alignment & 12;
 
-    int MarginL =
-        (event->MarginL) ? event->MarginL : render_priv->state.style->MarginL;
-    int MarginR =
-        (event->MarginR) ? event->MarginR : render_priv->state.style->MarginR;
-    int MarginV =
-        (event->MarginV) ? event->MarginV : render_priv->state.style->MarginV;
+    int MarginL = render_priv->state.margin_l;
+    if (!MarginL) {
+        MarginL = event->MarginL;
+    }
+    if (!MarginL) {
+        MarginL = render_priv->state.style->MarginL;
+    }
+
+    int MarginR = render_priv->state.margin_r;
+    if (!MarginR) {
+        MarginR = event->MarginR;
+    }
+    if (!MarginR) {
+        MarginR = render_priv->state.style->MarginR;
+    }
+
+    int MarginV = render_priv->state.margin_v;
+    if (!MarginV) {
+        MarginV = event->MarginV;
+    }
+    if (!MarginV) {
+        MarginV = render_priv->state.style->MarginV;
+    }
 
     // calculate max length of a line
     double max_text_width =

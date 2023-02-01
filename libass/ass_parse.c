@@ -872,6 +872,30 @@ char *parse_tags(ASS_Renderer *render_priv, char *p, char *end, double pwr,
             else
                 val = render_priv->state.style->Encoding;
             render_priv->state.font_encoding = val;
+        } else if (tag("marginl")) {
+            int32_t val = 0;
+            if (nargs) {
+                val = argtoi32(*args);
+            } else {
+                val = render_priv->state.style->MarginL;
+            }
+            render_priv->state.margin_l = val;
+        } else if (tag("marginr")) {
+            int32_t val = 0;
+            if (nargs) {
+                val = argtoi32(*args);
+            } else {
+                val = render_priv->state.style->MarginR;
+            }
+            render_priv->state.margin_r = val;
+        } else if (tag("marginv")) {
+            int32_t val = 0;
+            if (nargs) {
+                val = argtoi32(*args);
+            } else {
+                val = render_priv->state.style->MarginV;
+            }
+            render_priv->state.margin_v = val;
         }
     }
 
