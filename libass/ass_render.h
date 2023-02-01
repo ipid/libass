@@ -85,6 +85,9 @@ typedef struct {
     int detect_collisions;
     int shift_direction;
     ASS_Event *event;
+
+    // 扩展：供 \lhd、\lwd 使用，这两个值根据 height、width 加上 \lhd、\lwd 的值得到
+    int layout_height, layout_width;
 } EventImages;
 
 typedef enum {
@@ -279,6 +282,9 @@ typedef struct {
     int margin_l;
     int margin_r;
     int margin_v;
+
+    // 扩展：记录 \lwd、\lhd 的值，它们表示在布局时对该行字幕的高度和宽度进行的调整值
+    double layout_width_delta, layout_height_delta;
 } RenderContext;
 
 typedef struct {
