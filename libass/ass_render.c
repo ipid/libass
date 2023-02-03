@@ -3043,6 +3043,18 @@ ass_render_event(RenderContext *state, ASS_Event *event,
     event_images->event = event;
     event_images->imgs = render_text(state);
 
+    {
+        // Output render info
+        double base_x = 0;
+        double base_y = 0;
+        get_base_point(&bbox, state->alignment, &base_x, &base_y);
+
+        event->rendered_pos_x = device_x + base_x;
+        event->rendered_pos_y = device_y + base_y;
+        event->rendered_width = event_images->width;
+        event->rendered_height = event_images->height;
+    }
+
     if (state->border_style == 4)
         add_background(state, event_images);
 
@@ -3307,6 +3319,8 @@ fix_collisions(ASS_Renderer *render_priv, EventImages *imgs, int cnt)
             priv->height = imgs[i].height;
             priv->left = imgs[i].left;
             priv->width = imgs[i].width;
+
+            imgs[i].event->rendered_pos_y += shift;
         }
 
     }

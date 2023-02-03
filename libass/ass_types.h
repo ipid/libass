@@ -147,6 +147,9 @@ typedef struct ass_event {
     char *Text;
 
     ASS_RenderPriv *render_priv;
+
+    // 扩展：调试用
+    int rendered_pos_x, rendered_pos_y, rendered_width, rendered_height;
 } ASS_Event;
 
 /**
