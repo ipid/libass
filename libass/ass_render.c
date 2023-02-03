@@ -1069,6 +1069,7 @@ init_render_context(ASS_Renderer *render_priv, ASS_Event *event)
     render_priv->state.justify = render_priv->state.style->Justify;
 
     render_priv->state.margin_l = render_priv->state.margin_r = render_priv->state.margin_v = 0;
+    render_priv->state.layout_width_delta = render_priv->state.layout_height_delta = 0;
 }
 
 static void free_render_context(ASS_Renderer *render_priv)
@@ -2852,6 +2853,14 @@ ass_render_event(ASS_Renderer *render_priv, ASS_Event *event,
     if (render_priv->state.border_style == 4)
         add_background(render_priv, event_images);
 
+    double revised_layout_width_delta = ((double) render_priv->state.layout_width_delta) *
+                                        render_priv->orig_width / render_priv->track->PlayResX;
+    double revised_layout_height_delta = ((double) render_priv->state.layout_height_delta) *
+                                         render_priv->orig_height / render_priv->track->PlayResY;
+
+    event_images->layout_width = event_images->width + nearbyint(revised_layout_width_delta);
+    event_images->layout_height = event_images->height + nearbyint(revised_layout_height_delta);
+
     ass_shaper_cleanup(render_priv->shaper, text_info);
     free_render_context(render_priv);
 
@@ -3048,7 +3057,7 @@ fix_collisions(ASS_Renderer *render_priv, EventImages *imgs, int cnt)
         ASS_RenderPriv *priv;
         // VSFilter considers events colliding if their intersections area is non-zero,
         // zero-area events are therefore effectively fixed as well
-        if (!imgs[i].detect_collisions || !imgs[i].height  || !imgs[i].width)
+        if (!imgs[i].detect_collisions || !imgs[i].layout_height || !imgs[i].layout_width)
             continue;
         priv = get_render_priv(render_priv, imgs[i].event);
         if (priv && priv->height > 0) { // it's a fixed event
@@ -3057,7 +3066,7 @@ fix_collisions(ASS_Renderer *render_priv, EventImages *imgs, int cnt)
             s.y1 = priv->top + priv->height;
             s.x0 = priv->left;
             s.x1 = priv->left + priv->width;
-            if (priv->height != imgs[i].height) {       // no, it's not
+            if (priv->height != imgs[i].layout_height) {       // no, it's not
                 ass_msg(render_priv->library, MSGL_WARN,
                         "Event height has changed");
                 priv->top = 0;
@@ -3087,24 +3096,24 @@ fix_collisions(ASS_Renderer *render_priv, EventImages *imgs, int cnt)
     // try to fit other events in free spaces
     for (i = 0; i < cnt; ++i) {
         ASS_RenderPriv *priv;
-        if (!imgs[i].detect_collisions || !imgs[i].height  || !imgs[i].width)
+        if (!imgs[i].detect_collisions || !imgs[i].layout_height || !imgs[i].layout_width)
             continue;
         priv = get_render_priv(render_priv, imgs[i].event);
         if (priv && priv->height == 0) {        // not a fixed event
             int shift;
             Rect s;
             s.y0 = imgs[i].top;
-            s.y1 = imgs[i].top + imgs[i].height;
+            s.y1 = imgs[i].top + imgs[i].layout_height;
             s.x0 = imgs[i].left;
-            s.x1 = imgs[i].left + imgs[i].width;
+            s.x1 = imgs[i].left + imgs[i].layout_width;
             shift = fit_rect(&s, used, &cnt_used, imgs[i].shift_direction);
             if (shift)
                 shift_event(render_priv, imgs + i, shift);
             // make it fixed
             priv->top = imgs[i].top;
-            priv->height = imgs[i].height;
+            priv->height = imgs[i].layout_height;
             priv->left = imgs[i].left;
-            priv->width = imgs[i].width;
+            priv->width = imgs[i].layout_width;
         }
 
     }

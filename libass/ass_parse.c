@@ -896,6 +896,18 @@ char *parse_tags(ASS_Renderer *render_priv, char *p, char *end, double pwr,
                 val = render_priv->state.style->MarginV;
             }
             render_priv->state.margin_v = val;
+        } else if (tag("lwd")) {
+            int32_t val = 0;
+            if (nargs) {
+                val = argtoi32(*args);
+            }
+            render_priv->state.layout_width_delta = val;
+        } else if (tag("lhd")) {
+            int32_t val = 0;
+            if (nargs) {
+                val = argtoi32(*args);
+            }
+            render_priv->state.layout_height_delta = val;
         }
     }
 
