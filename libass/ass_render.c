@@ -992,7 +992,7 @@ static void init_font_scale(ASS_Renderer *render_priv)
  * \brief partially reset render_context to style values
  * Works like {\r}: resets some style overrides
  */
-void reset_render_context(ASS_Renderer *render_priv, ASS_Style *style)
+void reset_render_context(ASS_Renderer *render_priv, ASS_Style *style, bool is_r_tag)
 {
     style = handle_selective_style_overrides(render_priv, style);
 
@@ -1014,9 +1014,12 @@ void reset_render_context(ASS_Renderer *render_priv, ASS_Style *style)
     render_priv->state.italic = style->Italic;
     update_font(render_priv);
 
-    render_priv->state.border_style = style->BorderStyle;
-    render_priv->state.border_x = style->Outline;
-    render_priv->state.border_y = style->Outline;
+    if (!(is_r_tag && render_priv->state.lock_bord)) {
+        render_priv->state.border_style = style->BorderStyle;
+        render_priv->state.border_x = style->Outline;
+        render_priv->state.border_y = style->Outline;
+    }
+
     render_priv->state.scale_x = style->ScaleX;
     render_priv->state.scale_y = style->ScaleY;
     render_priv->state.hspacing = style->Spacing;
@@ -1065,12 +1068,15 @@ init_render_context(ASS_Renderer *render_priv, ASS_Event *event)
     render_priv->state.explicit = render_priv->state.evt_type != EVENT_NORMAL ||
                                   event_has_hard_overrides(event->Text);
 
-    reset_render_context(render_priv, NULL);
+    reset_render_context(render_priv, NULL, false);
     render_priv->state.alignment = render_priv->state.style->Alignment;
     render_priv->state.justify = render_priv->state.style->Justify;
 
     render_priv->state.margin_l = render_priv->state.margin_r = render_priv->state.margin_v = 0;
     render_priv->state.layout_width_delta = render_priv->state.layout_height_delta = 0;
+    render_priv->state.extra_border_x = render_priv->state.extra_border_y = 0;
+    render_priv->state.glyph_width_delta = render_priv->state.glyph_height_delta = 0;
+    render_priv->state.lock_bord = false;
 }
 
 static void free_render_context(ASS_Renderer *render_priv)
@@ -1566,6 +1572,7 @@ static void measure_text(ASS_Renderer *render_priv)
     measure_text_on_eol(render_priv, scale, cur_line,
             max_asc, max_desc, max_border_x, max_border_y);
     text_info->height += cur_line * render_priv->settings.line_spacing;
+    text_info->height += render_priv->state.glyph_height_delta;
 }
 
 /**

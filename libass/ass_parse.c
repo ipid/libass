@@ -769,9 +769,9 @@ char *parse_tags(ASS_Renderer *render_priv, char *p, char *end, double pwr,
             if (nargs) {
                 int len = args->end - args->start;
                 reset_render_context(render_priv,
-                        lookup_style_strict(render_priv->track, args->start, len));
+                        lookup_style_strict(render_priv->track, args->start, len), true);
             } else
-                reset_render_context(render_priv, NULL);
+                reset_render_context(render_priv, NULL, true);
         } else if (tag("be")) {
             double dval;
             if (nargs) {
@@ -924,6 +924,20 @@ char *parse_tags(ASS_Renderer *render_priv, char *p, char *end, double pwr,
                 val = (val <= 0) ? 0 : val;
             }
             render_priv->state.extra_border_y = val;
+        } else if (tag("glyphwidthdelta")) {
+            double val = 0;
+            if (nargs) {
+                val = argtod(*args);
+            }
+            render_priv->state.glyph_width_delta = val;
+        } else if (tag("glyphheightdelta")) {
+            double val = 0;
+            if (nargs) {
+                val = argtod(*args);
+            }
+            render_priv->state.glyph_height_delta = val;
+        } else if (tag("lockbord")) {
+            render_priv->state.lock_bord = true;
         }
     }
 

@@ -288,6 +288,10 @@ typedef struct {
 
     // 扩展：记录 \extraxbord、\extraybord 的值
     double extra_border_x, extra_border_y;
+
+    double glyph_width_delta, glyph_height_delta;
+
+    bool lock_bord;
 } RenderContext;
 
 typedef struct {
@@ -352,7 +356,7 @@ typedef struct {
     int y1;
 } Rect;
 
-void reset_render_context(ASS_Renderer *render_priv, ASS_Style *style);
+void reset_render_context(ASS_Renderer *render_priv, ASS_Style *style, bool is_r_tag);
 void ass_frame_ref(ASS_Image *img);
 void ass_frame_unref(ASS_Image *img);
 
