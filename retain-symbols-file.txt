@@ -1,2 +1,8 @@
-accupos_done
 accupos_init
+accupos_done
+accupos_get_dialogue_num
+accupos_get_ith_raw
+accupos_get_ith_pos_x
+accupos_get_ith_pos_y
+accupos_get_ith_width
+accupos_get_ith_height

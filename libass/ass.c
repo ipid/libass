@@ -148,6 +148,7 @@ void ass_free_event(ASS_Track *track, int eid)
     free(event->Effect);
     free(event->Text);
     free(event->render_priv);
+    free(event->raw_line);
 }
 
 void ass_free_style(ASS_Track *track, int sid)
@@ -956,6 +957,29 @@ static bool detect_legacy_conv_subs(ASS_Track *track)
     return true;
 }
 
+static char* copy_line_and_strip_tail(const char *original) {
+    size_t len = strcspn(original, "\r\n");
+    while ((len > 0) && (
+        original[len - 1] == '\r' || 
+        original[len - 1] == '\n' ||
+        original[len - 1] == '\t' ||
+        original[len - 1] == ' '
+    )) {
+        len--;
+    }
+
+    char *raw_line = malloc(len + 1);
+    if (!raw_line) {
+        return NULL;
+    }
+
+    if (len > 0) {
+        memcpy(raw_line, original, len);
+    }
+    raw_line[len] = '\0';
+
+    return raw_line;
+}
 
 static int process_events_line(ASS_Track *track, char *str)
 {
@@ -986,6 +1010,9 @@ static int process_events_line(ASS_Track *track, char *str)
         int eid;
         ASS_Event *event;
 
+        // A copy of the original line
+        char *raw_line = copy_line_and_strip_tail(str);
+
         // We can't parse events without event_format
         if (!track->event_format) {
             event_format_fallback(track);
@@ -1000,6 +1027,11 @@ static int process_events_line(ASS_Track *track, char *str)
         if (eid < 0)
             return -1;
         event = track->events + eid;
+        if (event) {
+            event->raw_line = raw_line;
+            // Transfer string pointer ownership to the event; `ass_free_event` will free it
+            raw_line = NULL;
+        }
 
         int ret = process_event_tail(track, event, str, 0);
         if (!ret)

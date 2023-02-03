@@ -150,6 +150,7 @@ typedef struct ass_event {
 
     // 扩展：调试用
     int rendered_pos_x, rendered_pos_y, rendered_width, rendered_height;
+    char *raw_line;
 } ASS_Event;
 
 /**
