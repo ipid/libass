@@ -284,7 +284,7 @@ typedef struct {
     int margin_v;
 
     // 扩展：记录 \lwd、\lhd 的值，它们表示在布局时对该行字幕的高度和宽度进行的调整值
-    double layout_width_delta, layout_height_delta;
+    int layout_width_delta, layout_height_delta;
 
     // 扩展：记录 \extraxbord、\extraybord 的值
     double extra_border_x, extra_border_y;
