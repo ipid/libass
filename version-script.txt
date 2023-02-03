@@ -1,7 +1,7 @@
 LIBACCUPOS_1.0 {
     global:
-        accupos_init;
         accupos_done;
+        accupos_init;
 
     local:
         *;

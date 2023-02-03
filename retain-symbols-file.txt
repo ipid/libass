@@ -1,2 +1,2 @@
-accupos_init
 accupos_done
+accupos_init
