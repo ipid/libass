@@ -1028,6 +1028,7 @@ void reset_render_context(ASS_Renderer *render_priv, ASS_Style *style)
     render_priv->state.frz = style->Angle;
     render_priv->state.fax = render_priv->state.fay = 0.;
     render_priv->state.font_encoding = style->Encoding;
+    render_priv->state.extra_border_x = render_priv->state.extra_border_y = 0;
 }
 
 /**

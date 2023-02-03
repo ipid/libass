@@ -908,6 +908,22 @@ char *parse_tags(ASS_Renderer *render_priv, char *p, char *end, double pwr,
                 val = argtoi32(*args);
             }
             render_priv->state.layout_height_delta = val;
+        } else if (tag("extraxbord")) {
+            double val = 0;
+            if (nargs) {
+                val = argtod(*args);
+                val = render_priv->state.extra_border_x * (1 - pwr) + val * pwr;
+                val = (val <= 0) ? 0 : val;
+            }
+            render_priv->state.extra_border_x = val;
+        } else if (tag("extraybord")) {
+            double val = 0;
+            if (nargs) {
+                val = argtod(*args);
+                val = render_priv->state.extra_border_y * (1 - pwr) + val * pwr;
+                val = (val <= 0) ? 0 : val;
+            }
+            render_priv->state.extra_border_y = val;
         }
     }
 
