@@ -3462,6 +3462,43 @@ ASS_Image *ass_render_frame(ASS_Renderer *priv, ASS_Track *track,
     return priv->images_root;
 }
 
+int ass_render_all_events(ASS_Renderer *priv, ASS_Track *track) {
+    // init frame
+    if (!ass_start_frame(priv, track, 0)) {
+        return 1;
+    }
+
+    // render events separately
+    int cnt = 0;
+    for (int i = 0; i < track->n_events; i++) {
+        ASS_Event *event = track->events + i;
+        if (cnt >= priv->eimg_size) {
+            priv->eimg_size += 100;
+            priv->eimg =
+                realloc(priv->eimg,
+                        priv->eimg_size * sizeof(EventImages));
+        }
+        if (ass_render_event(&priv->state, event, priv->eimg + cnt))
+            cnt++;
+    }
+
+    // sort by layer
+    if (cnt > 0)
+        qsort(priv->eimg, cnt, sizeof(EventImages), cmp_event_layer);
+
+    // call fix_collisions for each group of events with the same layer
+    EventImages *last = priv->eimg;
+    for (int i = 1; i < cnt; i++)
+        if (last->event->Layer != priv->eimg[i].event->Layer) {
+            fix_collisions(priv, last, priv->eimg + i - last);
+            last = priv->eimg + i;
+        }
+    if (cnt > 0)
+        fix_collisions(priv, last, priv->eimg + cnt - last);
+
+    return 0;
+}
+
 /**
  * \brief Add reference to a frame image list.
  * \param image_list image list returned by ass_render_frame()

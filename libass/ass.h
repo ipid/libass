@@ -605,6 +605,13 @@ void ass_set_cache_limits(ASS_Renderer *priv, int glyph_max,
 ASS_Image *ass_render_frame(ASS_Renderer *priv, ASS_Track *track,
                             long long now, int *detect_change);
 
+/**
+ * \brief Try render all events in the track.
+ * \param priv renderer handle
+ * \param track subtitle track
+ * \return 0 on success, 1 on error
+ */
+int ass_render_all_events(ASS_Renderer *priv, ASS_Track *track);
 
 /*
  * The following functions operate on track objects and do not need
