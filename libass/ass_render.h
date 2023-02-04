@@ -345,6 +345,9 @@ struct ass_renderer {
 typedef struct render_priv {
     int top, height, left, width;
     int render_id;
+
+    // accupos extension
+    int detect_collisions, shift_direction;
 } RenderPriv;
 
 typedef struct {

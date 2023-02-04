@@ -2836,6 +2836,21 @@ static bool
 ass_render_event(RenderContext *state, ASS_Event *event,
                  EventImages *event_images)
 {
+    if (event->render_priv != NULL) {
+        // Accupos optimization: We don't need image, so we don't need to render it again
+        event_images->event = event;
+        event_images->top = event->render_priv->top;
+        event_images->left = event->render_priv->left;
+        event_images->width = event->render_priv->width;
+        event_images->height = event->render_priv->height;
+        event_images->detect_collisions = event->render_priv->detect_collisions;
+        event_images->shift_direction = event->render_priv->shift_direction;
+        event_images->imgs = calloc(1, sizeof(ASS_ImagePriv));
+
+        free_render_context(state);
+        return true;
+    }
+
     ASS_Renderer *render_priv = state->renderer;
     if (event->Style >= render_priv->track->n_styles) {
         ass_msg(render_priv->library, MSGL_WARN, "No style found");
@@ -3041,7 +3056,7 @@ ass_render_event(RenderContext *state, ASS_Event *event,
     event_images->detect_collisions = state->detect_collisions;
     event_images->shift_direction = (valign == VALIGN_SUB) ? -1 : 1;
     event_images->event = event;
-    event_images->imgs = render_text(state);
+    event_images->imgs = calloc(1, sizeof(ASS_ImagePriv));
 
     if (!event->accupos_priv_is_value_set) {
         // accupos: Output render info
@@ -3057,8 +3072,8 @@ ass_render_event(RenderContext *state, ASS_Event *event,
         event->accupos_priv_is_value_set = 1;
     }
 
-    if (state->border_style == 4)
-        add_background(state, event_images);
+    // if (state->border_style == 4)
+    //     add_background(state, event_images);
 
     ass_shaper_cleanup(state->shaper, text_info);
     free_render_context(state);
@@ -3323,6 +3338,8 @@ fix_collisions(ASS_Renderer *render_priv, EventImages *imgs, int cnt)
             priv->height = imgs[i].height;
             priv->left = imgs[i].left;
             priv->width = imgs[i].width;
+            priv->detect_collisions = imgs[i].detect_collisions;
+            priv->shift_direction = imgs[i].shift_direction;
         }
 
     }
@@ -3507,10 +3524,7 @@ int accupos_render_all_events(ASS_Renderer *priv, ASS_Track *track) {
     }
 
     for (int i = 0; i < n_start; i++) {
-        if (ass_render_frame(priv, track, arr_start[i], NULL) == NULL) {
-            free(arr_start);
-            return 1;
-        }
+        ass_render_frame(priv, track, arr_start[i], NULL);
     }
 
     free(arr_start);
