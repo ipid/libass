@@ -1,7 +1,6 @@
 #include "accupos.h"
 
 #include <stdlib.h>
-#include <memory.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -77,6 +76,7 @@ static bool copy_events_to_accupos(Accupos_Library *lib) {
         lib->dialogues[i].pos_y = ass_events[i].rendered_pos_y;
         lib->dialogues[i].width = ass_events[i].rendered_width;
         lib->dialogues[i].height = ass_events[i].rendered_height;
+        lib->dialogues[i].is_positioned = ass_events[i].is_positioned;
     }
 
     return true;
@@ -107,6 +107,11 @@ static void free_libass_stuffs(Accupos_Library *lib) {
 }
 
 Accupos_Library *accupos_init(int32_t width, int32_t height, const char *ass_data, int32_t ass_data_len) {
+    if (width <= 0 || height <= 0 || width >= 0x40000000 || height >= 0x40000000 || ass_data == NULL ||
+        ass_data_len <= 8) {
+        return NULL;
+    }
+
     Accupos_Library *lib = (Accupos_Library *) calloc(1, sizeof(Accupos_Library));
 
     if (!lib) {
@@ -133,7 +138,7 @@ Accupos_Library *accupos_init(int32_t width, int32_t height, const char *ass_dat
         return NULL;
     }
 
-    if (ass_render_all_events(lib->libass->ass_renderer, lib->libass->track) != 0) {
+    if (accupos_render_all_events(lib->libass->ass_renderer, lib->libass->track) != 0) {
         accupos_done(lib);
         return NULL;
     }
@@ -154,7 +159,7 @@ void accupos_done(Accupos_Library *lib) {
 
     if (lib->dialogues) {
         for (int i = 0; i < lib->n_dialogues; i++) {
-            free((void *)lib->dialogues[i].raw);
+            free((void *) lib->dialogues[i].raw);
             lib->dialogues[i].raw = NULL;
         }
         free(lib->dialogues);
@@ -162,54 +167,6 @@ void accupos_done(Accupos_Library *lib) {
     }
 
     free_libass_stuffs(lib);
-    
+
     free(lib);
-}
-
-int32_t accupos_get_dialogue_num(Accupos_Library *lib) {
-    if (!lib) {
-        return -1;
-    }
-
-    return lib->n_dialogues;
-}
-
-const char *accupos_get_ith_raw(Accupos_Library *lib, int32_t i) {
-    if (!lib || !lib->dialogues || i < 0 || i >= lib->n_dialogues) {
-        return NULL;
-    }
-
-    return lib->dialogues[i].raw;
-}
-
-int32_t accupos_get_ith_pos_x(Accupos_Library *lib, int32_t i) {
-    if (!lib || !lib->dialogues || i < 0 || i >= lib->n_dialogues) {
-        return -1;
-    }
-
-    return lib->dialogues[i].pos_x;
-}
-
-int32_t accupos_get_ith_pos_y(Accupos_Library *lib, int32_t i) {
-    if (!lib || !lib->dialogues || i < 0 || i >= lib->n_dialogues) {
-        return -1;
-    }
-
-    return lib->dialogues[i].pos_y;
-}
-
-int32_t accupos_get_ith_width(Accupos_Library *lib, int32_t i) {
-    if (!lib || !lib->dialogues || i < 0 || i >= lib->n_dialogues) {
-        return -1;
-    }
-
-    return lib->dialogues[i].width;
-}
-
-int32_t accupos_get_ith_height(Accupos_Library *lib, int32_t i) {
-    if (!lib || !lib->dialogues || i < 0 || i >= lib->n_dialogues) {
-        return -1;
-    }
-
-    return lib->dialogues[i].height;
 }

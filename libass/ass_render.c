@@ -3043,8 +3043,8 @@ ass_render_event(RenderContext *state, ASS_Event *event,
     event_images->event = event;
     event_images->imgs = render_text(state);
 
-    {
-        // Output render info
+    if (!event->accupos_priv_is_value_set) {
+        // accupos: Output render info
         double base_x = 0;
         double base_y = 0;
         get_base_point(&bbox, state->alignment, &base_x, &base_y);
@@ -3053,6 +3053,8 @@ ass_render_event(RenderContext *state, ASS_Event *event,
         event->rendered_pos_y = device_y + base_y;
         event->rendered_width = event_images->width;
         event->rendered_height = event_images->height;
+        event->is_positioned = (state->evt_type & EVENT_POSITIONED) ? 1 : 0;
+        event->accupos_priv_is_value_set = 1;
     }
 
     if (state->border_style == 4)
@@ -3312,15 +3314,15 @@ fix_collisions(ASS_Renderer *render_priv, EventImages *imgs, int cnt)
             s.x0 = imgs[i].left;
             s.x1 = imgs[i].left + imgs[i].width;
             shift = fit_rect(&s, used, &cnt_used, imgs[i].shift_direction);
-            if (shift)
+            if (shift) {
                 shift_event(render_priv, imgs + i, shift);
+                imgs[i].event->rendered_pos_y += shift;
+            }
             // make it fixed
             priv->top = imgs[i].top;
             priv->height = imgs[i].height;
             priv->left = imgs[i].left;
             priv->width = imgs[i].width;
-
-            imgs[i].event->rendered_pos_y += shift;
         }
 
     }
@@ -3462,40 +3464,56 @@ ASS_Image *ass_render_frame(ASS_Renderer *priv, ASS_Track *track,
     return priv->images_root;
 }
 
-int ass_render_all_events(ASS_Renderer *priv, ASS_Track *track) {
-    // init frame
-    if (!ass_start_frame(priv, track, 0)) {
+static int accupos_cmp_start(const void *param1, const void *param2) {
+    const long long *a = (const long long *)param1;
+    const long long *b = (const long long *)param2;
+
+    if (*a < *b) {
+        return -1;
+    } else if (*a > *b) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int accupos_render_all_events(ASS_Renderer *priv, ASS_Track *track) {
+    int n_start = track->n_events;
+    if (n_start <= 0) {
         return 1;
     }
 
-    // render events separately
-    int cnt = 0;
-    for (int i = 0; i < track->n_events; i++) {
-        ASS_Event *event = track->events + i;
-        if (cnt >= priv->eimg_size) {
-            priv->eimg_size += 100;
-            priv->eimg =
-                realloc(priv->eimg,
-                        priv->eimg_size * sizeof(EventImages));
-        }
-        if (ass_render_event(&priv->state, event, priv->eimg + cnt))
-            cnt++;
+    long long *arr_start = calloc(n_start, sizeof(long long));
+
+    for (int i = 0; i < n_start; i++) {
+        arr_start[i] = track->events[i].Start;
     }
 
-    // sort by layer
-    if (cnt > 0)
-        qsort(priv->eimg, cnt, sizeof(EventImages), cmp_event_layer);
+    qsort(arr_start, n_start, sizeof(long long), accupos_cmp_start);
 
-    // call fix_collisions for each group of events with the same layer
-    EventImages *last = priv->eimg;
-    for (int i = 1; i < cnt; i++)
-        if (last->event->Layer != priv->eimg[i].event->Layer) {
-            fix_collisions(priv, last, priv->eimg + i - last);
-            last = priv->eimg + i;
+    // Remove duplicate
+    if (n_start >= 2) {
+        int slow = 1, fast = 1;
+
+        while (slow < n_start && fast < n_start) {
+            if (arr_start[fast] != arr_start[fast - 1]) {
+                arr_start[slow] = arr_start[fast];
+                slow++;
+            }
+            fast++;
         }
-    if (cnt > 0)
-        fix_collisions(priv, last, priv->eimg + cnt - last);
 
+        n_start = slow;
+    }
+
+    for (int i = 0; i < n_start; i++) {
+        if (ass_render_frame(priv, track, arr_start[i], NULL) == NULL) {
+            free(arr_start);
+            return 1;
+        }
+    }
+
+    free(arr_start);
     return 0;
 }
 

@@ -611,7 +611,7 @@ ASS_Image *ass_render_frame(ASS_Renderer *priv, ASS_Track *track,
  * \param track subtitle track
  * \return 0 on success, 1 on error
  */
-int ass_render_all_events(ASS_Renderer *priv, ASS_Track *track);
+int accupos_render_all_events(ASS_Renderer *priv, ASS_Track *track);
 
 /*
  * The following functions operate on track objects and do not need

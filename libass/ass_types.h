@@ -148,8 +148,12 @@ typedef struct ass_event {
 
     ASS_RenderPriv *render_priv;
 
-    // 扩展：调试用
-    int rendered_pos_x, rendered_pos_y, rendered_width, rendered_height;
+    // 扩展：accupos 输出
+    double rendered_pos_x, rendered_pos_y;
+    int rendered_width, rendered_height;
+    int is_positioned, accupos_priv_is_value_set;
+
+    // 生命期由 ASS_Event 管理，请勿直接使用此指针
     char *raw_line;
 } ASS_Event;
 

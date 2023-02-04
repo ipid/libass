@@ -3,9 +3,10 @@
 #include "../libass/ass.h"
 
 typedef struct {
+    double pos_x, pos_y;
     const char *raw;
-    int32_t pos_x, pos_y;
     int32_t width, height;
+    int32_t is_positioned;
 } Accupos_Dialogue;
 
 typedef struct Accupos_LibassPrivate Accupos_LibassPrivate;
@@ -22,10 +23,3 @@ Accupos_Library *accupos_init(
 );
 
 void accupos_done(Accupos_Library *lib);
-
-int32_t accupos_get_dialogue_num(Accupos_Library *lib);
-const char *accupos_get_ith_raw(Accupos_Library *lib, int32_t i);
-int32_t accupos_get_ith_pos_x(Accupos_Library *lib, int32_t i);
-int32_t accupos_get_ith_pos_y(Accupos_Library *lib, int32_t i);
-int32_t accupos_get_ith_width(Accupos_Library *lib, int32_t i);
-int32_t accupos_get_ith_height(Accupos_Library *lib, int32_t i);
