@@ -39,7 +39,7 @@ int main(const int argv, const char **argc) {
         (int32_t) width, (int32_t) height, ass_data_buf, (int32_t) bytes_read);
     clock_gettime(CLOCK_REALTIME, &after_init);
 
-    printf("accupos initialization: %ld ms\n", (after_init.tv_sec - before_init.tv_sec) * 1000 + (after_init.tv_nsec - before_init.tv_nsec) / 1000000);
+    printf("accupos initialization: %lld ms\n", (after_init.tv_sec - before_init.tv_sec) * 1000 + (after_init.tv_nsec - before_init.tv_nsec) / 1000000);
 
     for (int i = 0; i < accupos->n_dialogues; i++) {
         Accupos_Dialogue *dialogue = &accupos->dialogues[i];
