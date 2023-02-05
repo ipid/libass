@@ -5,11 +5,19 @@
 
 #include "../accupos/accupos.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #define ASS_DATA_BUF (8 * 1024 * 1024)
 
 char ass_data_buf[ASS_DATA_BUF];
 
 int main(const int argv, const char **argc) {
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+
     if (argv != 4) {
         printf("ERROR: argv != 4\n");
         return 1;
