@@ -77,6 +77,18 @@ static bool copy_events_to_accupos(Accupos_Library *lib) {
         lib->dialogues[i].width = ass_events[i].rendered_width;
         lib->dialogues[i].height = ass_events[i].rendered_height;
         lib->dialogues[i].is_positioned = ass_events[i].is_positioned;
+
+        if (sizeof(Ass_RTagOutputForAccupos) != sizeof(Accupos_RTag)) {
+            return false;
+        }
+
+        lib->dialogues[i].rtags = malloc(ass_events[i].n_rtag * sizeof(Accupos_RTag));
+        if (!lib->dialogues[i].rtags) {
+            return false;
+        }
+        lib->dialogues[i].n_rtags = ass_events[i].n_rtag;
+
+        memcpy(lib->dialogues[i].rtags, ass_events[i].rtags, ass_events[i].n_rtag * sizeof(Accupos_RTag));
     }
 
     return true;
@@ -161,6 +173,9 @@ void accupos_done(Accupos_Library *lib) {
         for (int i = 0; i < lib->n_dialogues; i++) {
             free((void *) lib->dialogues[i].raw);
             lib->dialogues[i].raw = NULL;
+
+            free(lib->dialogues[i].rtags);
+            lib->dialogues[i].rtags = NULL;
         }
         free(lib->dialogues);
         lib->dialogues = NULL;

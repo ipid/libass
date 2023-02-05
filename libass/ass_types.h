@@ -127,6 +127,11 @@ typedef struct ass_style {
     int Justify; // sets text justification independent of event alignment; use ASS_JUSTIFY_*
 } ASS_Style;
 
+typedef struct Ass_RTagOutputForAccupos {
+    // Start: points to the slash \. E.g. '\\' of \rStyle
+    // End: points to the end of style name. E.g. 'e' of \rStyle
+    int32_t start, end;
+} Ass_RTagOutputForAccupos;
 
 /*
  * ASS_Event corresponds to a single Dialogue line;
@@ -155,6 +160,8 @@ typedef struct ass_event {
 
     // 生命期由 ASS_Event 管理，请勿直接使用此指针
     char *raw_line;
+    Ass_RTagOutputForAccupos* rtags;
+    int n_rtag, max_rtag;
 } ASS_Event;
 
 /**

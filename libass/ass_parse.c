@@ -273,6 +273,26 @@ static ASS_Style *lookup_style_strict(ASS_Track *track, char *name, size_t len)
     return NULL;
 }
 
+static void accupos_put_new_rtag(ASS_Event *event, int start, int end)
+{
+    if (event->n_rtag >= event->max_rtag) {
+        event->max_rtag += 20;
+        ASS_REALLOC_ARRAY(event->rtags, event->max_rtag);
+    }
+
+    if (event->rtags == NULL) {
+        event->n_rtag = 0;
+        event->max_rtag = 0;
+        return;
+    }
+
+    Ass_RTagOutputForAccupos *rtag = &event->rtags[event->n_rtag];
+    rtag->start = start;
+    rtag->end = end;
+
+    event->n_rtag++;
+}
+
 /**
  * \brief Parse style override tags.
  * \param p string to parse
@@ -801,6 +821,8 @@ char *ass_parse_tags(RenderContext *state, char *p, char *end, double pwr,
                 change_alpha(&state->c[3],
                              _a(state->style->BackColour), 1);
         } else if (tag("r")) {
+            accupos_put_new_rtag(state->event, p - 2 - state->event->Text, q - 1 - state->event->Text);
+
             if (nargs) {
                 int len = args->end - args->start;
                 ass_reset_render_context(state,

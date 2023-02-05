@@ -3,8 +3,18 @@
 #include "../libass/ass.h"
 
 typedef struct {
+    // Start: points to the slash \. E.g. '\\' of \rStyle
+    // End: points to the end of style name. E.g. 'e' of \rStyle
+    int32_t start, end;
+} Accupos_RTag;
+
+typedef struct {
     double pos_x, pos_y;
     const char *raw;
+
+    Accupos_RTag *rtags;
+    int32_t n_rtags;
+
     int32_t width, height;
     int32_t is_positioned;
 } Accupos_Dialogue;

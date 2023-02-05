@@ -53,15 +53,26 @@ int main(const int argv, const char **argc) {
         Accupos_Dialogue *dialogue = &accupos->dialogues[i];
 
         printf(
-            "#%d: <%s>, pos_x = %f, pos_y = %f, width = %d, height = %d, positioned = %s\n",
+            "#%d: <%s>, pos_x = %f, pos_y = %f, width = %d, height = %d, positioned = %s, %d rTags\n",
             i + 1,
             dialogue->raw,
             dialogue->pos_x,
             dialogue->pos_y,
             dialogue->width,
             dialogue->height,
-            dialogue->is_positioned ? "true" : "false"
+            dialogue->is_positioned ? "true" : "false",
+            dialogue->n_rtags
         );
+
+        for (int r = 0; r < dialogue->n_rtags; r++) {
+            Accupos_RTag *rtag = &dialogue->rtags[r];
+            printf(
+                "    rTag #%d: start = %d, end = %d\n",
+                r + 1,
+                rtag->start,
+                rtag->end
+            );
+        }
     }
 
     accupos_done(accupos);

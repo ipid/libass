@@ -149,6 +149,9 @@ void ass_free_event(ASS_Track *track, int eid)
     free(event->Text);
     free(event->render_priv);
     free(event->raw_line);
+    free(event->rtags);
+    event->rtags = NULL;
+    event->max_rtag = event->n_rtag = 0;
 }
 
 void ass_free_style(ASS_Track *track, int sid)
