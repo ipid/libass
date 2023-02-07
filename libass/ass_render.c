@@ -3056,7 +3056,7 @@ ass_render_event(RenderContext *state, ASS_Event *event,
     event_images->detect_collisions = state->detect_collisions;
     event_images->shift_direction = (valign == VALIGN_SUB) ? -1 : 1;
     event_images->event = event;
-    event_images->imgs = calloc(1, sizeof(ASS_ImagePriv));
+    event_images->imgs = render_text(state);
 
     if (!event->accupos_priv_is_value_set) {
         // accupos: Output render info
@@ -3072,8 +3072,8 @@ ass_render_event(RenderContext *state, ASS_Event *event,
         event->accupos_priv_is_value_set = 1;
     }
 
-    // if (state->border_style == 4)
-    //     add_background(state, event_images);
+     if (state->border_style == 4)
+         add_background(state, event_images);
 
     ass_shaper_cleanup(state->shaper, text_info);
     free_render_context(state);
