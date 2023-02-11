@@ -2,8 +2,7 @@
 
 if [ "$1" == "--clean" ]; then
     rm -rf build
-    git clean -xdf
-    git reset --hard HEAD
+    git stash --all
 
     if [ -f Makefile ]; then
         make distclean
