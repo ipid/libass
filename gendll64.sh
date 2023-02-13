@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if [ "$1" == "--clean" ]; then
-    ./autogen.sh
     make distclean
+    ./autogen.sh
 
     export CFLAGS="-fPIC -static -static-libgcc -static-libstdc++"
     ./configure --prefix=/usr/i686-w64-mingw32/ --build=x86_64-linux-gnu --host=x86_64-w64-mingw32 --enable-static=yes --enable-shared=no
