@@ -1,19 +1,10 @@
 #!/bin/bash
 
 if [ "$1" == "--clean" ]; then
-    rm -rf build
-    git stash --all
-
-    if [ -f Makefile ]; then
-        make distclean
-    fi
+    ./autogen.sh
+    make distclean
 
     export CFLAGS="-fPIC -static -static-libgcc -static-libstdc++"
-
-    if [ ! -f configure ]; then
-        ./autogen.sh
-    fi
-
     ./configure --prefix=/usr/i686-w64-mingw32/ --build=x86_64-linux-gnu --host=i686-w64-mingw32 --enable-static=yes --enable-shared=no
 fi
 
